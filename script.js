@@ -1,4 +1,3 @@
-// ==================== STATE MANAGEMENT ====================
 const state = {
   currentMode: "pomodoro",
   isRunning: false,
@@ -15,6 +14,7 @@ const state = {
     autoStartPomodoros: false,
     soundEnabled: true,
     volume: 50,
+    notificationTone: "alarm",
     theme: "system",
   },
 };
@@ -48,6 +48,8 @@ const elements = {
   autoStartBreaksInput: document.getElementById("autoStartBreaks"),
   autoStartPomodorosInput: document.getElementById("autoStartPomodoros"),
   soundEnabledInput: document.getElementById("soundEnabled"),
+  notificationToneSelect: document.getElementById("notificationTone"),
+  testSoundBtn: document.getElementById("testSoundBtn"),
   volumeControl: document.getElementById("volumeControl"),
   volumeValue: document.getElementById("volumeValue"),
   themeSelect: document.getElementById("themeSelect"),
@@ -58,8 +60,106 @@ const elements = {
   // Audio
   notificationSound: document.getElementById("notificationSound"),
 
+  // Notification banner
+  notificationBanner: document.getElementById("notificationBanner"),
+  notificationMessage: document.getElementById("notificationMessage"),
+  notificationIcon: document.getElementById("notificationIcon"),
+  notificationClose: document.getElementById("notificationClose"),
+
   // Progress ring
   progressRingFill: document.querySelector(".progress-ring-circle-fill"),
+};
+
+// ==================== NOTIFICATION SYSTEM ====================
+const NotificationManager = {
+  timeoutId: null,
+  currentAudio: null,
+  isPlayingAudio: false,
+
+  init() {
+    elements.notificationClose.addEventListener("click", () => {
+      this.hide();
+      this.stopAudio();
+    });
+  },
+
+  stopAudio() {
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio.currentTime = 0;
+      this.currentAudio = null;
+      this.isPlayingAudio = false;
+    }
+  },
+
+  setAudio(audio) {
+    this.currentAudio = audio;
+    this.isPlayingAudio = true;
+
+    // Listen for audio end event
+    const handleAudioEnd = () => {
+      this.isPlayingAudio = false;
+      this.currentAudio = null;
+      // Only auto-hide if notification is still showing
+      if (elements.notificationBanner.classList.contains("show")) {
+        this.hide();
+      }
+      audio.removeEventListener("ended", handleAudioEnd);
+    };
+
+    audio.addEventListener("ended", handleAudioEnd);
+  },
+
+  show(message, type = "info", duration = 3000, withAudio = false) {
+    // Clear any existing timeout
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+    }
+
+    // Set message and icon based on type
+    elements.notificationMessage.textContent = message;
+
+    // Remove all type classes
+    elements.notificationBanner.classList.remove(
+      "success",
+      "error",
+      "info",
+      "warning"
+    );
+
+    // Add appropriate type class
+    elements.notificationBanner.classList.add(type);
+
+    // Set icon based on type
+    const icons = {
+      success: "✓",
+      error: "✕",
+      info: "ℹ",
+      warning: "⚠",
+    };
+    elements.notificationIcon.textContent = icons[type] || icons.info;
+
+    // Show notification
+    elements.notificationBanner.classList.add("show");
+
+    // Only auto-hide if not playing audio
+    if (!withAudio) {
+      this.timeoutId = setTimeout(() => {
+        this.hide();
+      }, duration);
+    }
+    // If with audio, the banner will hide when audio ends (handled in setAudio)
+  },
+
+  hide() {
+    elements.notificationBanner.classList.remove("show");
+    if (this.timeoutId) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
+    }
+    // Reset audio tracking when hiding
+    this.isPlayingAudio = false;
+  },
 };
 
 // ==================== THEME MANAGEMENT ====================
@@ -352,18 +452,39 @@ const TimerManager = {
   },
 
   playNotification() {
+    this.playSound(state.settings.notificationTone, true);
+  },
+
+  playSound(tone, isNotification = false) {
     const audio = elements.notificationSound;
+    const soundFile = this.getSoundFile(tone);
+
+    audio.src = soundFile;
     audio.volume = state.settings.volume / 100;
 
-    // Create a simple beep sound using Web Audio API if no audio file is available
-    if (!audio.src || audio.error) {
+    audio.play().catch((err) => {
+      NotificationManager.show(
+        "Audio playback failed, using fallback sound",
+        "warning",
+        2000
+      );
       this.playBeep();
-    } else {
-      audio.play().catch((err) => {
-        console.log("Audio playback failed:", err);
-        this.playBeep();
-      });
+    });
+
+    // If this is a notification sound, track it
+    if (isNotification) {
+      NotificationManager.setAudio(audio);
     }
+  },
+
+  getSoundFile(tone) {
+    const soundMap = {
+      alarm: "audios/iphone_alarm.mp3",
+      signal: "audios/loud_signal.mp3",
+      nashia_signal: "audios/nashia_signal.mp3",
+      radar: "audios/radar.mp3",
+    };
+    return soundMap[tone] || soundMap.alarm;
   },
 
   playBeep() {
@@ -391,7 +512,12 @@ const TimerManager = {
       longBreak: "Long break complete. Let's get back to work!",
     };
 
-    alert(messages[state.currentMode]);
+    NotificationManager.show(
+      messages[state.currentMode],
+      "success",
+      5000,
+      true
+    );
   },
 
   handleAutoStart() {
@@ -448,6 +574,11 @@ const SettingsManager = {
     elements.volumeControl.addEventListener("input", (e) => {
       elements.volumeValue.textContent = `${e.target.value}%`;
     });
+
+    // Test sound button
+    elements.testSoundBtn.addEventListener("click", () => {
+      this.testSound();
+    });
   },
 
   openModal() {
@@ -467,6 +598,7 @@ const SettingsManager = {
     elements.autoStartPomodorosInput.checked =
       state.settings.autoStartPomodoros;
     elements.soundEnabledInput.checked = state.settings.soundEnabled;
+    elements.notificationToneSelect.value = state.settings.notificationTone;
     elements.volumeControl.value = state.settings.volume;
     elements.volumeValue.textContent = `${state.settings.volume}%`;
     elements.themeSelect.value = state.settings.theme;
@@ -490,6 +622,7 @@ const SettingsManager = {
     state.settings.autoStartPomodoros =
       elements.autoStartPomodorosInput.checked;
     state.settings.soundEnabled = elements.soundEnabledInput.checked;
+    state.settings.notificationTone = elements.notificationToneSelect.value;
     state.settings.volume = parseInt(elements.volumeControl.value, 10);
 
     // Save to localStorage
@@ -505,6 +638,20 @@ const SettingsManager = {
     this.showSaveConfirmation();
   },
 
+  testSound() {
+    const selectedTone = elements.notificationToneSelect.value;
+    const currentVolume = parseInt(elements.volumeControl.value, 10);
+
+    // Temporarily update volume for testing
+    const tempVolume = state.settings.volume;
+    state.settings.volume = currentVolume;
+
+    TimerManager.playSound(selectedTone);
+
+    // Restore original volume
+    state.settings.volume = tempVolume;
+  },
+
   loadSettings() {
     const saved = localStorage.getItem("pomodoroSettings");
     if (saved) {
@@ -513,19 +660,178 @@ const SettingsManager = {
     }
   },
 
+  testSound() {
+    const selectedTone = elements.notificationToneSelect.value;
+    const currentVolume = parseInt(elements.volumeControl.value, 10);
+
+    // Temporarily update volume for testing
+    const tempVolume = state.settings.volume;
+    state.settings.volume = currentVolume;
+
+    TimerManager.playSound(selectedTone);
+
+    // Restore original volume
+    state.settings.volume = tempVolume;
+  },
+
   showSaveConfirmation() {
-    // You can implement a toast notification here
-    console.log("Settings saved successfully!");
+    NotificationManager.show("Settings saved successfully!", "success", 2000);
+  },
+};
+
+// ==================== SERVICE WORKER REGISTRATION ====================
+const PWAManager = {
+  deferredPrompt: null,
+  installPromptElement: null,
+  installBtn: null,
+  installLaterBtn: null,
+
+  init() {
+    this.installPromptElement = document.getElementById("installPrompt");
+    this.installBtn = document.getElementById("installBtn");
+    this.installLaterBtn = document.getElementById("installLaterBtn");
+
+    this.registerServiceWorker();
+    this.handleInstallPrompt();
+    this.setupEventListeners();
+  },
+
+  registerServiceWorker() {
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/service-worker.js")
+          .then((registration) => {
+            console.log(
+              "Service Worker registered successfully:",
+              registration.scope
+            );
+
+            // Check for updates periodically
+            setInterval(() => {
+              registration.update();
+            }, 60000); // Check every minute
+          })
+          .catch((error) => {
+            console.log("Service Worker registration failed:", error);
+          });
+      });
+    }
+  },
+
+  handleInstallPrompt() {
+    window.addEventListener("beforeinstallprompt", (e) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later
+      this.deferredPrompt = e;
+
+      // Show install notification banner after a short delay
+      setTimeout(() => {
+        NotificationManager.show(
+          "Install this app for a better experience!",
+          "info",
+          5000
+        );
+      }, 3000);
+
+      // Check if user has dismissed the prompt before
+      const dismissed = localStorage.getItem("installPromptDismissed");
+      if (!dismissed) {
+        // Show custom install prompt after a short delay
+        setTimeout(() => {
+          this.showInstallPrompt();
+        }, 5000);
+      }
+    });
+
+    window.addEventListener("appinstalled", () => {
+      NotificationManager.show(
+        "App installed successfully! You can now use it offline.",
+        "success",
+        4000
+      );
+      this.hideInstallPrompt();
+      this.deferredPrompt = null;
+    });
+  },
+
+  setupEventListeners() {
+    if (this.installBtn) {
+      this.installBtn.addEventListener("click", () => {
+        this.installApp();
+      });
+    }
+
+    if (this.installLaterBtn) {
+      this.installLaterBtn.addEventListener("click", () => {
+        this.dismissInstallPrompt();
+      });
+    }
+  },
+
+  showInstallPrompt() {
+    if (this.installPromptElement) {
+      this.installPromptElement.classList.add("show");
+    }
+  },
+
+  hideInstallPrompt() {
+    if (this.installPromptElement) {
+      this.installPromptElement.classList.remove("show");
+    }
+  },
+
+  async installApp() {
+    if (!this.deferredPrompt) {
+      NotificationManager.show(
+        "Installation not available at this time.",
+        "error",
+        3000
+      );
+      return;
+    }
+
+    // Show the install prompt
+    this.deferredPrompt.prompt();
+
+    // Wait for the user to respond to the prompt
+    const { outcome } = await this.deferredPrompt.userChoice;
+
+    if (outcome === "accepted") {
+      NotificationManager.show("Installing app...", "success", 2000);
+    } else {
+      NotificationManager.show("Installation cancelled.", "info", 2000);
+    }
+
+    // Hide the custom prompt
+    this.hideInstallPrompt();
+
+    // Clear the deferredPrompt
+    this.deferredPrompt = null;
+  },
+
+  dismissInstallPrompt() {
+    this.hideInstallPrompt();
+    // Remember that user dismissed the prompt (for this session only)
+    localStorage.setItem("installPromptDismissed", "true");
+    NotificationManager.show(
+      "You can install later from your browser menu.",
+      "info",
+      3000
+    );
   },
 };
 
 // ==================== INITIALIZATION ====================
 function init() {
+  NotificationManager.init();
   ThemeManager.init();
   ModeManager.init();
   TimerManager.init();
   SettingsManager.init();
   TimerManager.loadSessionCount();
+  PWAManager.init();
 }
 
 // Start the app when DOM is ready

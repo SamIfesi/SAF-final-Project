@@ -564,12 +564,237 @@ main {
   color: var(--text-secondary);
   font-weight: var(--font-weight-medium);
 }
+
+.btn-test-sound {
+  margin-top: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-test-sound:hover {
+  background: var(--primary);
+  color: var(--text-inverse);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-test-sound:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-test-sound:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .settings-footer {
   padding: var(--spacing-lg) var(--spacing-xl);
   border-top: 1px solid var(--border-color);
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
 }
+
+/* ==================== NOTIFICATION BANNER ==================== */
+.notification-banner {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  padding: var(--spacing-md) var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  min-width: 320px;
+  max-width: 500px;
+  z-index: 1000;
+  opacity: 0;
+  transition: all var(--transition-base);
+  backdrop-filter: blur(10px);
+}
+
+.notification-banner.show {
+  top: var(--spacing-xl);
+  opacity: 1;
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1;
+}
+
+.notification-icon {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  min-width: 24px;
+  text-align: center;
+}
+
+.notification-banner.success .notification-icon {
+  color: var(--accent);
+}
+
+.notification-banner.error .notification-icon {
+  color: var(--danger);
+}
+
+.notification-banner.info .notification-icon {
+  color: var(--primary);
+}
+
+.notification-banner.warning .notification-icon {
+  color: #f59e0b;
+}
+
+.notification-message {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: var(--font-size-2xl);
+  cursor: pointer;
+  transition: color var(--transition-base);
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+}
+
+.notification-close:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+/* ==================== INSTALL PROMPT ==================== */
+.install-prompt {
+  position: fixed;
+  bottom: -200px;
+  left: 50%;
+  right: 0;
+  transform: translateX(-50%);
+  max-width: 40rem;
+  width: 100%;
+  background: var(--bg-primary);
+  border-top: 2px solid var(--primary);
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-lg);
+  z-index: 900;
+  opacity: 0;
+  transition: all var(--transition-base);
+  backdrop-filter: blur(10px);
+}
+
+.install-prompt.show {
+  bottom: 0;
+  opacity: 1;
+}
+
+.install-prompt-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex: 1;
+}
+
+.install-prompt-text h3 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+}
+
+.install-prompt-text p {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.install-prompt-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.btn-install,
+.btn-install-later {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+}
+
+.btn-install {
+  background: var(--primary);
+  color: var(--text-inverse);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-install:hover {
+  background: var(--primary-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-install:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-install-later {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.btn-install-later:hover {
+  color: var(--text-primary);
+  border-color: var(--border-color-hover);
+  background: var(--bg-tertiary);
+}
+
+/* ==================== FOOTER ==================== */
 footer {
   margin-top: var(--spacing-2xl);
   padding-top: var(--spacing-xl);
@@ -625,6 +850,43 @@ footer {
   .settings-content {
     margin: 5vh var(--spacing-md);
     max-height: 90vh;
+  }
+
+  .notification-banner {
+    min-width: calc(100vw - 2rem);
+    max-width: calc(100vw - 2rem);
+    left: 1rem;
+    transform: translateX(0);
+  }
+
+  .notification-banner.show {
+    top: var(--spacing-md);
+  }
+
+  /* Install Prompt Mobile Adjustments */
+  .install-prompt {
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+  }
+
+  .install-prompt-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--spacing-sm);
+  }
+
+  .install-prompt-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-install,
+  .btn-install-later {
+    width: 100%;
+    padding: var(--spacing-md);
   }
 }
 @media (max-width: 480px) {

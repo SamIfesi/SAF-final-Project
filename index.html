@@ -7,12 +7,46 @@
       name="description"
       content="A Pomodoro Timer app to help manage your time effectively using the Pomodoro Technique"
     />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#f97316" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Pomodoro Timer" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="manifest.json" />
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" sizes="72x72" href="icons/icon-72x72.png" />
+    <link rel="apple-touch-icon" sizes="96x96" href="icons/icon-96x96.png" />
+    <link
+      rel="apple-touch-icon"
+      sizes="128x128"
+      href="icons/icon-128x128.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="144x144"
+      href="icons/icon-144x144.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="152x152"
+      href="icons/icon-152x152.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="192x192"
+      href="icons/icon-192x192.png"
+    />
+
+    <link rel="shortcut icon" href="icons/icon-96x96.png" type="image/png" />
+
     <title>Pomodoro Timer - Time Management Tool</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="container">
-      <!-- Header Section -->
       <header>
         <div class="header-content">
           <div class="header-text">
@@ -20,8 +54,20 @@
             <p class="subtitle">Focus. Break. Repeat.</p>
           </div>
           <div class="theme-toggle">
-            <button class="theme-btn" id="themeToggle" aria-label="Toggle theme">
-              <svg class="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button
+              class="theme-btn"
+              id="themeToggle"
+              aria-label="Toggle theme"
+            >
+              <svg
+                class="theme-icon sun-icon"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <circle cx="12" cy="12" r="5"></circle>
                 <line x1="12" y1="1" x2="12" y2="3"></line>
                 <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -32,8 +78,18 @@
                 <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
                 <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
               </svg>
-              <svg class="theme-icon moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              <svg
+                class="theme-icon moon-icon"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+                ></path>
               </svg>
             </button>
           </div>
@@ -165,6 +221,19 @@
               </div>
 
               <div class="setting-item">
+                <label for="notificationTone">Notification Sound</label>
+                <select id="notificationTone">
+                  <option value="alarm">Alarm</option>
+                  <option value="signal">Signal</option>
+                  <option value="nashia_signal">Nashia Signal</option>
+                  <option value="radar">Radar</option>
+                </select>
+                <button class="btn-test-sound" id="testSoundBtn" type="button">
+                  Test Sound
+                </button>
+              </div>
+
+              <div class="setting-item">
                 <label for="volumeControl"> Volume </label>
                 <input
                   type="range"
@@ -203,11 +272,37 @@
       </footer>
     </div>
 
-    <!-- Audio element for notifications -->
-    <audio id="notificationSound" preload="auto">
-      <!-- You can add your own sound file here -->
-      <source src="notification.mp3" type="audio/mpeg" />
-    </audio>
+    <!-- Notification Banner -->
+    <div class="notification-banner" id="notificationBanner">
+      <div class="notification-content">
+        <span class="notification-icon" id="notificationIcon">✓</span>
+        <span class="notification-message" id="notificationMessage"></span>
+      </div>
+      <button
+        class="notification-close"
+        id="notificationClose"
+        aria-label="Close notification"
+      >
+        &times;
+      </button>
+    </div>
+
+    <!-- Install App Prompt -->
+    <div class="install-prompt" id="installPrompt">
+      <div class="install-prompt-content"> 
+        <div class="install-prompt-text">
+          <h3>Install Pomodoro Timer</h3>
+          <p>Get quick access and use offline!</p>
+        </div>
+      </div>
+      <div class="install-prompt-actions">
+        <button class="btn-install" id="installBtn">Install</button>
+        <button class="btn-install-later" id="installLaterBtn">Later</button>
+      </div>
+    </div>
+
+    <!-- Audio elements for different notification tones -->
+    <audio id="notificationSound" preload="auto"></audio>
 
     <script src="script.js"></script>
   </body>

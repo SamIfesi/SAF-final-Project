@@ -1,0 +1,38 @@
+# Icon Generator Tool
+generate-icons.html
+ICONS_README.md
+PWA_SETUP.md
+
+# Node modules (if added in future)
+node_modules/
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Temporary files
+*.tmp
+*.temp
+
+# Build files (if added in future)
+dist/
+build/
