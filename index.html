@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A Pomodoro Timer app to help manage your time effectively using the Pomodoro Technique"
+    />
+    <title>Pomodoro Timer - Time Management Tool</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header Section -->
+      <header>
+        <div class="header-content">
+          <div class="header-text">
+            <h1>Pomodoro Timer</h1>
+            <p class="subtitle">Focus. Break. Repeat.</p>
+          </div>
+          <div class="theme-toggle">
+            <button class="theme-btn" id="themeToggle" aria-label="Toggle theme">
+              <svg class="theme-icon sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+              <svg class="theme-icon moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Timer Section -->
+      <main>
+        <!-- Mode Selection -->
+        <div class="mode-selector">
+          <button class="mode-btn active" data-mode="pomodoro">Pomodoro</button>
+          <button class="mode-btn" data-mode="shortBreak">Short Break</button>
+          <button class="mode-btn" data-mode="longBreak">Long Break</button>
+        </div>
+
+        <!-- Timer Display -->
+        <div class="timer-display">
+          <div class="time-wrapper">
+            <span class="time" id="timer">25:00</span>
+          </div>
+          <div class="progress-ring">
+            <svg width="300" height="300">
+              <circle
+                class="progress-ring-circle"
+                stroke="#e0e0e0"
+                stroke-width="8"
+                fill="transparent"
+                r="140"
+                cx="150"
+                cy="150"
+              />
+              <circle
+                class="progress-ring-circle-fill"
+                stroke="#ff6b6b"
+                stroke-width="8"
+                fill="transparent"
+                r="140"
+                cx="150"
+                cy="150"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="controls">
+          <button class="btn btn-primary" id="startBtn">Start</button>
+          <button class="btn btn-secondary" id="pauseBtn" disabled>
+            Pause
+          </button>
+          <button class="btn btn-tertiary" id="resetBtn">Reset</button>
+        </div>
+
+        <!-- Session Counter -->
+        <div class="session-info">
+          <p>Sessions Completed: <span id="sessionCount">0</span></p>
+        </div>
+      </main>
+
+      <!-- Settings Section -->
+      <section class="settings">
+        <button class="btn-settings" id="settingsBtn">Settings</button>
+
+        <!-- Settings Modal -->
+        <div class="settings-modal" id="settingsModal">
+          <div class="settings-content">
+            <div class="settings-header">
+              <h2>Timer Settings</h2>
+              <button class="close-btn" id="closeSettings">&times;</button>
+            </div>
+
+            <div class="settings-body">
+              <div class="setting-item">
+                <label for="pomodoroTime"> Pomodoro Duration (minutes) </label>
+                <input
+                  type="number"
+                  id="pomodoroTime"
+                  min="1"
+                  max="60"
+                  value="25"
+                />
+              </div>
+
+              <div class="setting-item">
+                <label for="shortBreakTime">
+                  Short Break Duration (minutes)
+                </label>
+                <input
+                  type="number"
+                  id="shortBreakTime"
+                  min="1"
+                  max="30"
+                  value="5"
+                />
+              </div>
+
+              <div class="setting-item">
+                <label for="longBreakTime">
+                  Long Break Duration (minutes)
+                </label>
+                <input
+                  type="number"
+                  id="longBreakTime"
+                  min="1"
+                  max="60"
+                  value="15"
+                />
+              </div>
+
+              <div class="setting-item">
+                <label for="autoStartBreaks">
+                  <input type="checkbox" id="autoStartBreaks" />
+                  Auto-start breaks
+                </label>
+              </div>
+
+              <div class="setting-item">
+                <label for="autoStartPomodoros">
+                  <input type="checkbox" id="autoStartPomodoros" />
+                  Auto-start pomodoros
+                </label>
+              </div>
+
+              <div class="setting-item">
+                <label for="soundEnabled">
+                  <input type="checkbox" id="soundEnabled" checked />
+                  Enable sound notifications
+                </label>
+              </div>
+
+              <div class="setting-item">
+                <label for="volumeControl"> Volume </label>
+                <input
+                  type="range"
+                  id="volumeControl"
+                  min="0"
+                  max="100"
+                  value="50"
+                />
+                <span id="volumeValue">50%</span>
+              </div>
+
+              <div class="setting-item">
+                <label for="themeSelect">Theme</label>
+                <select id="themeSelect">
+                  <option value="system">System</option>
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="settings-footer">
+              <button class="btn btn-primary" id="saveSettings">
+                Save Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer>
+        <p>
+          &copy; 2025 Pomodoro Timer. Built with ❤️ for better productivity.
+        </p>
+      </footer>
+    </div>
+
+    <!-- Audio element for notifications -->
+    <audio id="notificationSound" preload="auto">
+      <!-- You can add your own sound file here -->
+      <source src="notification.mp3" type="audio/mpeg" />
+    </audio>
+
+    <script src="script.js"></script>
+  </body>
+</html>
