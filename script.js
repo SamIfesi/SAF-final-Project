@@ -282,14 +282,19 @@ const ModeManager = {
   switchMode(mode) {
     // Don't switch if timer is running
     if (state.isRunning && !state.isPaused) {
-      const confirmSwitch = confirm(
-        "Timer is running. Do you want to switch modes?"
+      NotificationManager.show(
+        "Timer is running! Please pause or reset before switching modes.",
+        "warning",
+        3000
       );
-      if (!confirmSwitch) return;
+      return;
     }
 
     // Stop current timer
     TimerManager.stop();
+
+    // Stop any playing notification audio
+    NotificationManager.stopAudio();
 
     // Update state
     state.currentMode = mode;
@@ -437,7 +442,10 @@ const TimerManager = {
     const circumference = 2 * Math.PI * radius;
 
     circle.style.strokeDasharray = `${circumference} ${circumference}`;
-    circle.style.strokeDashoffset = "0";
+    circle.style.strokeDashoffset = `0`;
+
+    // Update immediately to show full ring
+    this.updateProgressRing();
   },
 
   updateProgressRing() {
@@ -445,8 +453,9 @@ const TimerManager = {
     const radius = circle.r.baseVal.value;
     const circumference = 2 * Math.PI * radius;
 
-    const progress = state.timeLeft / state.totalTime;
-    const offset = circumference - progress * circumference;
+    const timeElapsed = state.totalTime - state.timeLeft;
+    const progress = timeElapsed / state.totalTime;
+    const offset = circumference * progress;
 
     circle.style.strokeDashoffset = offset;
   },
@@ -455,12 +464,18 @@ const TimerManager = {
     this.playSound(state.settings.notificationTone, true);
   },
 
-  playSound(tone, isNotification = false) {
+  playSound(tone, isNotification = false, isTest = false) {
     const audio = elements.notificationSound;
     const soundFile = this.getSoundFile(tone);
 
     audio.src = soundFile;
-    audio.volume = state.settings.volume / 100;
+
+    // For test sounds, use current slider value; for notifications, use saved setting
+    if (isTest) {
+      audio.volume = parseInt(elements.volumeControl.value, 10) / 100;
+    } else {
+      audio.volume = state.settings.volume / 100;
+    }
 
     audio.play().catch((err) => {
       NotificationManager.show(
@@ -572,7 +587,14 @@ const SettingsManager = {
 
     // Volume control
     elements.volumeControl.addEventListener("input", (e) => {
-      elements.volumeValue.textContent = `${e.target.value}%`;
+      const volumeValue = e.target.value;
+      elements.volumeValue.textContent = `${volumeValue}%`;
+
+      // Update volume in real-time if audio is playing
+      const audio = elements.notificationSound;
+      if (!audio.paused) {
+        audio.volume = volumeValue / 100;
+      }
     });
 
     // Test sound button
@@ -588,6 +610,12 @@ const SettingsManager = {
 
   closeModal() {
     elements.settingsModal.style.display = "none";
+    // Stop any playing test sound
+    const audio = elements.notificationSound;
+    if (!audio.paused) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
   },
 
   populateSettings() {
@@ -640,16 +668,7 @@ const SettingsManager = {
 
   testSound() {
     const selectedTone = elements.notificationToneSelect.value;
-    const currentVolume = parseInt(elements.volumeControl.value, 10);
-
-    // Temporarily update volume for testing
-    const tempVolume = state.settings.volume;
-    state.settings.volume = currentVolume;
-
-    TimerManager.playSound(selectedTone);
-
-    // Restore original volume
-    state.settings.volume = tempVolume;
+    TimerManager.playSound(selectedTone, false, true);
   },
 
   loadSettings() {
@@ -659,21 +678,6 @@ const SettingsManager = {
       state.settings = { ...state.settings, ...settings };
     }
   },
-
-  testSound() {
-    const selectedTone = elements.notificationToneSelect.value;
-    const currentVolume = parseInt(elements.volumeControl.value, 10);
-
-    // Temporarily update volume for testing
-    const tempVolume = state.settings.volume;
-    state.settings.volume = currentVolume;
-
-    TimerManager.playSound(selectedTone);
-
-    // Restore original volume
-    state.settings.volume = tempVolume;
-  },
-
   showSaveConfirmation() {
     NotificationManager.show("Settings saved successfully!", "success", 2000);
   },
@@ -736,7 +740,7 @@ const PWAManager = {
       }, 3000);
 
       // Check if user has dismissed the prompt before
-      const dismissed = localStorage.getItem("installPromptDismissed");
+      const dismissed = sessionStorage.getItem("installPromptDismissed");
       if (!dismissed) {
         // Show custom install prompt after a short delay
         setTimeout(() => {
